@@ -1,6 +1,8 @@
 /*jslint node : true, nomen: true, plusplus: true, vars: true, eqeq:true*/
 "use strict";
 
+var fs = require('fs');
+
 var certSeparator = '-----END CERTIFICATE-----';
 
 module.exports = {
