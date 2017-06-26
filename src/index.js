@@ -1,25 +1,18 @@
 /*jslint node : true, nomen: true, plusplus: true, vars: true, eqeq:true*/
 "use strict";
 
-var fs = require('fs');
+var fs = require('fs'),
+    unbundle = require('cert-unbundle');
 
-var certSeparator = '-----END CERTIFICATE-----',
-    regex = new RegExp(certSeparator+'\n?'),
-    encoding = {
-        encoding: 'utf-8'
-    };
-
-function parseVal(value) {
-    return value.split(regex).slice(0, -1).map(function (cert) {
-        return cert + certSeparator;
-    });
-}
+var encoding = {
+    encoding: 'utf-8'
+};
 
 module.exports = {
     parsePathSync: function (pathArray) {
         var paths = Array.isArray(pathArray) ? pathArray : [pathArray];
         return paths.reduce(function (carry, value) {
-            return carry.concat(parseVal(fs.readFileSync(value, encoding)));
+            return carry.concat(unbundle(fs.readFileSync(value, encoding)));
         }, []);
     },
     parsePath: function (pathArray, cb) {
@@ -30,7 +23,7 @@ module.exports = {
                     if (err) {
                         return reject(err);
                     }
-                    return resolve(parseVal(data));
+                    return resolve(unbundle(data));
                 })
             });
         });
@@ -38,7 +31,7 @@ module.exports = {
         if (cb) {
             return all.then(function (res) {
                 return cb(null, [].concat.apply([], res));
-            }).catch(function(err) {
+            }).catch(function (err) {
                 return cb(err);
             });
         }
